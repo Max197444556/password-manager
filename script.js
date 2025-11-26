@@ -198,6 +198,52 @@ function initializeAppListeners() {
         showToast('Disconnesso!', 'success');
     });
 
+    // Delete Account
+    const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+    if (deleteAccountBtn) {
+        deleteAccountBtn.addEventListener('click', async () => {
+            const firstConfirm = confirm('⚠️ ATTENZIONE! Stai per eliminare il tuo account e TUTTE le password salvate.\n\nQuesta azione è irreversibile. Sei sicuro di voler continuare?');
+
+            if (!firstConfirm) return;
+
+            const secondConfirm = confirm('🚨 ULTIMA CONFERMA!\n\nL\'account verrà eliminato definitivamente. Confermi?');
+
+            if (!secondConfirm) return;
+
+            deleteAccountBtn.disabled = true;
+            deleteAccountBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) throw new Error('Sessione non valida');
+
+                const response = await fetch('https://zhgpccmzgyertwnvyiaz.supabase.co/functions/v1/delete-account', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Errore durante l\'eliminazione');
+                }
+
+                alert('Account eliminato con successo. Verrai reindirizzato alla pagina di login.');
+                await supabase.auth.signOut();
+                window.location.reload();
+
+            } catch (error) {
+                console.error('Errore:', error);
+                showToast('Errore: ' + error.message, 'error');
+                deleteAccountBtn.disabled = false;
+                deleteAccountBtn.innerHTML = '<i class="fa-solid fa-user-xmark"></i>';
+            }
+        });
+    }
+
     // Handle Enter key
     passwordInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') saveBtn.click();
