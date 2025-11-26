@@ -307,7 +307,7 @@ function showAuth() {
 function showApp() {
     document.getElementById('authContainer').style.display = 'none';
     document.getElementById('appContainer').style.display = 'block';
-    document.getElementById('userEmail').textContent = currentUser.email;
+    document.getElementById('footerEmail').textContent = currentUser.email;
 
     // Initialize Delete All button listener (now that it's visible)
     const deleteAllBtn = document.getElementById('deleteAllBtn');
